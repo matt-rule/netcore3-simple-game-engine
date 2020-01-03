@@ -68,6 +68,7 @@ namespace netcore3_simple_game_engine
         protected override void OnLoad(EventArgs e)
         {
             LoadHandler(e);
+            Scene.Initialise();
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
