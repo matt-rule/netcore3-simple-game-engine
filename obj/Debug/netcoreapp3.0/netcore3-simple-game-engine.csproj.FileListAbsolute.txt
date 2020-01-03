@@ -1,0 +1,8 @@
+/home/matt/git/netcore3-simple-game-engine/bin/Debug/netcoreapp3.0/netcore3-simple-game-engine.deps.json
+/home/matt/git/netcore3-simple-game-engine/bin/Debug/netcoreapp3.0/netcore3-simple-game-engine.dll
+/home/matt/git/netcore3-simple-game-engine/bin/Debug/netcoreapp3.0/netcore3-simple-game-engine.pdb
+/home/matt/git/netcore3-simple-game-engine/obj/Debug/netcoreapp3.0/netcore3-simple-game-engine.csprojAssemblyReference.cache
+/home/matt/git/netcore3-simple-game-engine/obj/Debug/netcoreapp3.0/netcore3-simple-game-engine.AssemblyInfoInputs.cache
+/home/matt/git/netcore3-simple-game-engine/obj/Debug/netcoreapp3.0/netcore3-simple-game-engine.AssemblyInfo.cs
+/home/matt/git/netcore3-simple-game-engine/obj/Debug/netcoreapp3.0/netcore3-simple-game-engine.dll
+/home/matt/git/netcore3-simple-game-engine/obj/Debug/netcoreapp3.0/netcore3-simple-game-engine.pdb
