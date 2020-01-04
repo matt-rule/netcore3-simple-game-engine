@@ -31,7 +31,7 @@ namespace netcore3_simple_game_engine
         public LoadDelegate LoadHandler;
         public IScene Scene;
 
-        public MainWindow(WindowOptions options)
+        MainWindow(WindowOptions options)
             : base(options.Width,
                 options.Height,
                 GraphicsMode.Default,
@@ -74,7 +74,6 @@ namespace netcore3_simple_game_engine
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             Scene.Update(e.Time);
-            SwapBuffers();
         }
     }
 }
