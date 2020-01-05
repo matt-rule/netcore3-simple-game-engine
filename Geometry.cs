@@ -30,12 +30,19 @@ namespace netcore3_simple_game_engine
                     new Vertex3d(new Vector4(0.0f, 0.0f, 0.0f, 1.0f), col)
                 }
                 .Concat (
-                    Enumerable.Range(0, vertices)
-                    .Select(x => new Vertex3d(new Vector4((float)(radius*Math.Cos(x)), (float)(radius*Math.Sin(x)), 0.0f, 1.0f), col))
+                    Enumerable.Range(1, vertices)
+                    .Select(vertex => 2*Math.PI*vertex/vertices)
+                    .Select(angleRadians => new Vertex3d(new Vector4((float)(radius*Math.Cos(angleRadians)), (float)(radius*Math.Sin(angleRadians)), 0.0f, 1.0f), col))
                 )
                 .ToArray(),
                 Indices = Enumerable.Range(0, vertices)
-                .SelectMany(x => new uint[]{0, (uint)x, (uint)((x + 1) < vertices ? (x + 1) : 1)})
+                .SelectMany(x => new uint[]
+                    {
+                        0,
+                        (uint)((x + 1) <= vertices ? (x + 1) : ((x + 1) - vertices)),
+                        (uint)((x + 2) <= vertices ? (x + 2) : ((x + 2) - vertices))
+                    }
+                )
                 .ToArray()
             };
         }
