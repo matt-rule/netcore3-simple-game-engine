@@ -1,13 +1,12 @@
 using OpenTK;
 using OpenTK.Graphics;
 
-namespace netcore3_opentk_gl_experimental
+namespace netcore3_simple_game_engine
 {
     public interface IVertexData
     {
-        void Render()
-        {
 
-        }
+        void Initialise();
+        void Render();
     }
 }
