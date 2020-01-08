@@ -7,7 +7,7 @@ namespace netcore3_simple_game_engine
     public struct CollisionResult
     {
         public bool DidCollide;
-        public Vector2 NewCircleVelocity;
+        public Vector2d NewCircleVelocity;
     }
 
     public static class Collisions
@@ -15,12 +15,10 @@ namespace netcore3_simple_game_engine
         public static CollisionResult CircleVsUnmovablePoint(
             double circleRadius,
             // Point transformation for game coords.
-            // Includes all data about the point's position and rotation.
-            // We can apply this in inverse to the circle to get a nice coordinate system.
-            Matrix4 pointTransform,
+            Vector2d pointPosition,
             // Circle transformation for game coords.
-            Matrix4 circleTransform,
-            Vector2 circleVelocity
+            Vector2d circlePosition,
+            Vector2d circleVelocity
         )
         {
             // Return original velocity
@@ -41,25 +39,29 @@ namespace netcore3_simple_game_engine
             Matrix4 rectangleTransform,
             // Circle transformation for game coords.
             Matrix4 circleTransform,
-            Vector2 origCircleVelocity
+            Vector2d origCircleVelocity
         )
         {
             // A translation matrix stores its data in the last row.
-            Vector2 rectanglePosition = rectangleTransform.Row3.Xy;
-            Vector2 circlePosition = circleTransform.Row3.Xy;
+            Vector2d rectanglePosition = (Vector2d)(rectangleTransform.Row3.Xy);
+            Vector2d circlePosition = (Vector2d)circleTransform.Row3.Xy;
 
             // If any of four corner tests were a collision, return the first positive result
             Vector2d[] rectangleCorners = new Vector2d[] {
-                new Vector2d(rectanglePosition.X - rectangleWidth / 2, rectanglePosition.Y - rectangleHeight / 2),
-                new Vector2d(rectanglePosition.X - rectangleWidth / 2, rectanglePosition.Y + rectangleHeight / 2),
-                new Vector2d(rectanglePosition.X + rectangleWidth / 2, rectanglePosition.Y - rectangleHeight / 2),
-                new Vector2d(rectanglePosition.X + rectangleWidth / 2, rectanglePosition.Y + rectangleHeight / 2)
-            };
+                new Vector2d(-rectangleWidth / 2, -rectangleHeight / 2),
+                new Vector2d(-rectangleWidth / 2, +rectangleHeight / 2),
+                new Vector2d(+rectangleWidth / 2, -rectangleHeight / 2),
+                new Vector2d(+rectangleWidth / 2, +rectangleHeight / 2)
+            }
+            .Select(x => (new Vector4((float)x.X, (float)x.Y, (float)0.0, (float)1.0) * rectangleTransform).Xy)
+            .Select(x => new Vector2d((double)x.X, (double)x.Y))
+            .ToArray();
+
             
             var collisionResults = rectangleCorners.Select(x => CircleVsUnmovablePoint(
                 circleRadius,
-                rectangleTransform * Matrix4.CreateTranslation((float)x.X, (float)x.Y, 0.0f),
-                circleTransform,
+                x,
+                circlePosition,
                 origCircleVelocity
             ));
 
