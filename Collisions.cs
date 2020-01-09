@@ -14,18 +14,35 @@ namespace netcore3_simple_game_engine
     {
         public static CollisionResult CircleVsUnmovablePoint(
             double circleRadius,
-            // Point transformation for game coords.
+            // Point position in game coords.
+            // This is also the collision point.
             Vector2d pointPosition,
-            // Circle transformation for game coords.
+            // Circle position in game coords.
             Vector2d circlePosition,
             Vector2d circleVelocity
         )
         {
-            // Return original velocity
-            return new CollisionResult {
-                DidCollide = false,
-                NewCircleVelocity = circleVelocity
-            };
+            Vector2d collisionPoint = pointPosition;
+            double velocityMagnitude = circleVelocity.Length;
+
+            if ((circlePosition - pointPosition).Length < circleRadius)
+            {
+                return new CollisionResult {
+                    DidCollide = true,
+                    NewCircleVelocity = (circlePosition - pointPosition).Normalized() * velocityMagnitude
+                };
+            }
+            else
+            {
+                // Return original velocity
+                return new CollisionResult {
+                    DidCollide = false,
+                    NewCircleVelocity = circleVelocity
+                };                
+            }
+
+        //newVelX = (circleVelocity.x * (5 – 5000) + (2 * 5000 * 0)) / (5 + 5000);
+
         }
 
         // Treat the rectangle as an unmovable object and perform a collision test
@@ -53,8 +70,7 @@ namespace netcore3_simple_game_engine
                 new Vector2d(+rectangleWidth / 2, -rectangleHeight / 2),
                 new Vector2d(+rectangleWidth / 2, +rectangleHeight / 2)
             }
-            .Select(x => (new Vector4((float)x.X, (float)x.Y, (float)0.0, (float)1.0) * rectangleTransform).Xy)
-            .Select(x => new Vector2d((double)x.X, (double)x.Y))
+            .Select(x => (Vector2d)(new Vector4((float)x.X, (float)x.Y, (float)0.0, (float)1.0) * rectangleTransform).Xy)
             .ToArray();
 
             
@@ -64,6 +80,9 @@ namespace netcore3_simple_game_engine
                 circlePosition,
                 origCircleVelocity
             ));
+
+            if (collisionResults.Any(x => x.DidCollide))
+                return (collisionResults.First(x => x.DidCollide));
 
             // If any of four edge tests were a collision, pass on the first positive result
             
