@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -8,98 +9,49 @@ using OpenTK.Audio.OpenAL;
 
 namespace netcore3_simple_game_engine
 {
+    public struct SoundEntry
+    {
+        public int Buffer;
+        public int Source;
+    }
+
     public class Sound
     {
-        private static object LockObject = new object();
+        AudioContext context = null;
+        List<SoundEntry> soundEntries = new List<SoundEntry>();
 
-        public static void SoundThreadMethod()
+        public void PlaySound(string fileName)
         {
-            string filename = "193831__ligidium__door-knock-15.wav";
-
-            using (AudioContext context = new AudioContext())
+            if (context == null)
+                context = new AudioContext();
+                
+            SoundEntry entry = new SoundEntry
             {
-                int buffer;
-                int source;
-                int state;
+                Buffer = AL.GenBuffer(),
+                Source = AL.GenSource()
+            };
 
-                lock (LockObject)
-                {
-                    buffer = AL.GenBuffer();
-                    source = AL.GenSource();
-                    
-                    int channels, bits_per_sample, sample_rate;
-                    byte[] sound_data = LoadWave(File.Open(filename, FileMode.Open), out channels, out bits_per_sample, out sample_rate);
-                    AL.BufferData(buffer, GetSoundFormat(channels, bits_per_sample), sound_data, sound_data.Length, sample_rate);
+            int channels, bits_per_sample, sample_rate;
+            byte[] sound_data = LoadWave(File.Open(fileName, FileMode.Open), out channels, out bits_per_sample, out sample_rate);
+            AL.BufferData(entry.Buffer, GetSoundFormat(channels, bits_per_sample), sound_data, sound_data.Length, sample_rate);
 
-                    AL.Source(source, ALSourcei.Buffer, buffer);
-                    AL.SourcePlay(source);
+            AL.Source(entry.Source, ALSourcei.Buffer, entry.Buffer);
+            AL.SourcePlay(entry.Source);
 
-                    AL.GetSource(source, ALGetSourcei.SourceState, out state);
-                }
-
-                // Query the source to find out when it stops playing.
-                do
-                {
-                    Thread.Sleep(250);
-                    lock (LockObject)
-                    {
-                        AL.GetSource(source, ALGetSourcei.SourceState, out state);
-                    }
-                }
-                while ((ALSourceState)state == ALSourceState.Playing);
-
-                lock (LockObject)
-                {
-                    AL.SourceStop(source);
-                    AL.DeleteSource(source);
-                    AL.DeleteBuffer(buffer);
-                }
-            }
+            soundEntries.Add(entry);
         }
-        public static void MusicThreadMethod()
+
+        public void Cleanup()
         {
-            string filename = "501040__mattix__fable-tribute.wav";
-
-            using (AudioContext context = new AudioContext())
+            foreach (SoundEntry entry in soundEntries)
             {
-                int buffer;
-                int source;
                 int state;
-
-                lock (LockObject)
+                AL.GetSource(entry.Source, ALGetSourcei.SourceState, out state);
+                if ((ALSourceState)state != ALSourceState.Playing)
                 {
-                    Debug.WriteLine("1");
-                    buffer = AL.GenBuffer();
-                    source = AL.GenSource();
-                    
-                    int channels, bits_per_sample, sample_rate;
-                    byte[] sound_data = LoadWave(File.Open(filename, FileMode.Open), out channels, out bits_per_sample, out sample_rate);
-                    AL.BufferData(buffer, GetSoundFormat(channels, bits_per_sample), sound_data, sound_data.Length, sample_rate);
-
-                    AL.Source(source, ALSourcei.Buffer, buffer);
-                    AL.SourcePlay(source);
-
-                    AL.GetSource(source, ALGetSourcei.SourceState, out state);
-                }
-
-                // Query the source to find out when it stops playing.
-                do
-                {
-                    Thread.Sleep(250);
-                    lock (LockObject)
-                    {
-                        Debug.WriteLine("2");
-                        AL.GetSource(source, ALGetSourcei.SourceState, out state);
-                    }
-                }
-                while ((ALSourceState)state == ALSourceState.Playing);
-
-                lock (LockObject)
-                {
-                    Debug.WriteLine("3");
-                    AL.SourceStop(source);
-                    AL.DeleteSource(source);
-                    AL.DeleteBuffer(buffer);
+                    AL.SourceStop(entry.Source);
+                    AL.DeleteSource(entry.Source);
+                    AL.DeleteBuffer(entry.Buffer);
                 }
             }
         }
