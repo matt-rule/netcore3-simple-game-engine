@@ -8,6 +8,7 @@ namespace netcore3_simple_game_engine
     public struct CollisionResult
     {
         public bool DidCollide;
+        public Vector2d NewCirclePosition;
         public Vector2d NewCircleVelocity;
     }
 
@@ -28,9 +29,27 @@ namespace netcore3_simple_game_engine
 
             if ((circlePosition - pointPosition).Length < circleRadius)
             {
+                //var newVelocity = (circlePosition - pointPosition).Normalized() * velocityMagnitude;
+                Vector2d relativeCirclePosition = circlePosition - pointPosition;
+                double relativeAngleOfCircleRadians = Math.Atan2(relativeCirclePosition.Y, relativeCirclePosition.X) - Math.PI/2;
+                var rotationMatrix = Matrix4d.CreateRotationZ(relativeAngleOfCircleRadians).Inverted();
+
+                Vector3d rotatedCirclePosition = Vector3d.Transform(new Vector3d(relativeCirclePosition.X, relativeCirclePosition.Y, 0.0), rotationMatrix);
+                Vector3d rotatedCircleVelocity = Vector3d.Transform(new Vector3d(circleVelocity.X, circleVelocity.Y, 0.0), rotationMatrix);
+
+                // make the circle's Y velocity positive in this frame of reference,
+                Vector3d postCollisionRotatedCircleVelocity = new Vector3d(rotatedCircleVelocity.X, Math.Abs(rotatedCircleVelocity.Y), 0);
+
+                // Rotate the new velocity back.
+                Vector3d postCollisionCircleVelocity = Vector3d.Transform(postCollisionRotatedCircleVelocity, rotationMatrix.Inverted());
+
+                var newVelocity = postCollisionCircleVelocity.Xy * 1.005;
+
+                // Return as a positive collision result.
                 return new CollisionResult {
                     DidCollide = true,
-                    NewCircleVelocity = (circlePosition - pointPosition).Normalized() * velocityMagnitude
+                    NewCirclePosition = circlePosition + newVelocity,
+                    NewCircleVelocity = newVelocity
                 };
             }
             else
@@ -38,8 +57,9 @@ namespace netcore3_simple_game_engine
                 // Return original velocity
                 return new CollisionResult {
                     DidCollide = false,
+                    NewCirclePosition = circlePosition,
                     NewCircleVelocity = circleVelocity
-                };                
+                };
             }
         }
         public static CollisionResult CircleVsUnmovableLineSegment(
@@ -78,6 +98,7 @@ namespace netcore3_simple_game_engine
                 // Return a negative collision result.
                 return new CollisionResult {
                     DidCollide = false,
+                    NewCirclePosition = circlePosition,
                     // Use the original circle velocity.
                     NewCircleVelocity = circleVelocity
                 };     
@@ -90,10 +111,13 @@ namespace netcore3_simple_game_engine
                 // Rotate the new velocity back.
                 Vector3d postCollisionCircleVelocity = Vector3d.Transform(postCollisionRotatedCircleVelocity, rotationMatrix.Inverted());
 
+                var newVelocity = postCollisionCircleVelocity.Xy * 1.005;
+
                 // Return as a positive collision result.
                 return new CollisionResult {
                     DidCollide = true,
-                    NewCircleVelocity = postCollisionCircleVelocity.Xy * 1.005
+                    NewCirclePosition = circlePosition + newVelocity,
+                    NewCircleVelocity = newVelocity
                 };     
             }
         }
@@ -163,6 +187,7 @@ namespace netcore3_simple_game_engine
             // Return original velocity
             return new CollisionResult {
                 DidCollide = false,
+                NewCirclePosition = circlePosition,
                 NewCircleVelocity = origCircleVelocity
             };
         }
