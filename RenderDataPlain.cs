@@ -7,17 +7,24 @@ namespace netcore3_simple_game_engine
 {
     public class RenderDataPlain : IRenderData
     {
-        public Vertex2Plain[] Vertices;
+        public Vertex4Plain[] Vertices;
         public uint[] Indices;
         public int VertexArrayObjectId = -1;
         public int VertexBufferObjectId = -1;
         public int IndexBufferObjectId = -1;
+        public string ShaderName;
 
-        public RenderDataPlain()
+        public RenderDataPlain(BufferData2Plain bufferData, string shaderName)
         {
+            Vertices = bufferData.Vertices;
+            Indices = bufferData.Indices;
+            ShaderName = shaderName;
+
             VertexArrayObjectId = GL.GenVertexArray();
             VertexBufferObjectId = GL.GenBuffer();
             IndexBufferObjectId = GL.GenBuffer();
+
+            Bind();
         }
 
         private void Bind()
@@ -25,6 +32,8 @@ namespace netcore3_simple_game_engine
             GL.BindVertexArray(VertexArrayObjectId);
             GL.BindBuffer(BufferTarget.ArrayBuffer, VertexArrayObjectId);
 
+            ErrorCode error = GL.GetError();
+            error = GL.GetError();
             // create vertex buffer
             GL.NamedBufferStorage(
                 VertexBufferObjectId,
@@ -32,11 +41,15 @@ namespace netcore3_simple_game_engine
                 Vertices,
                 BufferStorageFlags.MapWriteBit);
 
+            error = GL.GetError();
             // position attribute
             GL.VertexArrayAttribBinding(VertexArrayObjectId, 0, 0);
+            error = GL.GetError();
             GL.EnableVertexArrayAttrib(VertexArrayObjectId, 0);
+            error = GL.GetError();
             // VertexArrayAttribFormat is the equivalent of glVertexAttribPointer
             GL.VertexArrayAttribFormat(VertexArrayObjectId, 0, 4, VertexAttribType.Float, false, 0);
+            error = GL.GetError();
 
             // colour attribute
             // position precedes this; offset by its size
@@ -53,27 +66,34 @@ namespace netcore3_simple_game_engine
 
         private void Unbind()
         {
-            if (VertexArrayObjectId != -1)
-            {
-                GL.DeleteVertexArray(VertexArrayObjectId);
-                VertexArrayObjectId = -1;
-            }
-            if (VertexBufferObjectId != -1)
-            {
-                GL.DeleteBuffer(VertexBufferObjectId);
-                VertexBufferObjectId = -1;
-            }
-            if (IndexBufferObjectId != -1)
-            {
-                GL.DeleteBuffer(IndexBufferObjectId);
-                IndexBufferObjectId = -1;
-            }
+            GL.DeleteVertexArray(VertexArrayObjectId);
+            GL.DeleteBuffer(VertexBufferObjectId);
+            GL.DeleteBuffer(IndexBufferObjectId);
         }
 
-        public void Render()
+        public void Render(Matrix4 Mvp)
         {
+            ErrorCode error = GL.GetError();
+            var shaderObj = ShaderObjectSingleton.GetByName(ShaderName);
+
+            error = GL.GetError();
+                
+            GL.UseProgram(shaderObj.ProgramId);
+
+            error = GL.GetError();
+
             Bind();
+
+            error = GL.GetError();
+            GL.UniformMatrix4(shaderObj.MatrixShaderLocation, false, ref Mvp);
+
+            error = GL.GetError();
+            GL.DrawElements(PrimitiveType.Triangles, Indices.Length, DrawElementsType.UnsignedInt, 0);
+
+            error = GL.GetError();
             Unbind();
+
+            error = GL.GetError();
         }
 
         public void Dispose()

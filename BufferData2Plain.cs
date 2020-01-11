@@ -7,7 +7,7 @@ namespace netcore3_simple_game_engine
 {
     public class BufferData2Plain
     {
-        public Vertex2Plain[] Vertices;
+        public Vertex4Plain[] Vertices;
         public uint[] Indices;
 
         public static BufferData2Plain Rectangle(Color4 col, float width = 1, float height = 1)
@@ -19,8 +19,8 @@ namespace netcore3_simple_game_engine
                     new Vector2(width, height),
                     new Vector2(0, height)
                 }
-                .Select(x => new Vertex2Plain {
-                    Position = x,
+                .Select(v => new Vertex4Plain {
+                    Position = new Vector4(v.X, v.Y, 0.0f, 1.0f),
                     Colour = col
                 })
                 .ToArray(),
@@ -39,8 +39,8 @@ namespace netcore3_simple_game_engine
                     new Vector2(width/2, height/2),
                     new Vector2(-width/2, height/2)
                 }
-                .Select(x => new Vertex2Plain {
-                    Position = x,
+                .Select(v => new Vertex4Plain {
+                    Position = new Vector4(v.X, v.Y, 0.0f, 1.0f),
                     Colour = col
                 })
                 .ToArray(),
@@ -53,17 +53,22 @@ namespace netcore3_simple_game_engine
         public static BufferData2Plain UnitCircle(Color4 col, int vertices, float radius)
         {
             return new BufferData2Plain {
-                Vertices = new Vertex2Plain[] {
-                    new Vertex2Plain{
-                        Position = new Vector2(0.0f, 0.0f),
+                Vertices = new Vertex4Plain[] {
+                    new Vertex4Plain{
+                        Position = Vector4.Zero,
                         Colour = col
                     }
                 }
                 .Concat (
                     Enumerable.Range(1, vertices)
                     .Select(vertex => 2*Math.PI*vertex/vertices)
-                    .Select(angleRadians => new Vertex2Plain{
-                            Position = new Vector2((float)(radius*Math.Cos(angleRadians)), (float)(radius*Math.Sin(angleRadians))),
+                    .Select(angleRadians => new Vertex4Plain{
+                            Position = new Vector4(
+                                (float)(radius*Math.Cos(angleRadians)),
+                                (float)(radius*Math.Sin(angleRadians)),
+                                0.0f,
+                                1.0f
+                            ),
                             Colour = col
                         }
                     )

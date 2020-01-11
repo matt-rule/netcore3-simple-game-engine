@@ -1,5 +1,4 @@
 using OpenTK;
-using OpenTK.Graphics;
 using System;
 
 namespace netcore3_simple_game_engine
@@ -17,6 +16,6 @@ namespace netcore3_simple_game_engine
     /// </summary>
     public interface IRenderData: IDisposable
     {
-        void Render();
+        void Render(Matrix4 Mvp);
     }
 }
