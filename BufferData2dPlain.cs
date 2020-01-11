@@ -1,8 +1,8 @@
 namespace netcore3_simple_game_engine
 {
-    public struct BufferData
+    public struct BufferData2dPlain
     {
-        public Vertex3d[] Vertices;
+        public Vertex2d[] Vertices;
         public uint[] Indices;
     }
 }
