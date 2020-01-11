@@ -41,8 +41,8 @@ namespace netcore3_simple_game_engine
             try
             {
                 ProgramId = GL.CreateProgram();
-                VertexShaderId = CompileShader(ShaderType.VertexShader, "shader.vert");
-                FragmentShaderId = CompileShader(ShaderType.FragmentShader, "shader.frag");
+                VertexShaderId = CompileShader(ShaderType.VertexShader, vertexShaderFileName);
+                FragmentShaderId = CompileShader(ShaderType.FragmentShader, fragmentShaderFileName);
 
                 GL.AttachShader(ProgramId, VertexShaderId);
                 GL.AttachShader(ProgramId, FragmentShaderId);
