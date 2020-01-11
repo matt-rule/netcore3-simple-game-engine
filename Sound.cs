@@ -20,7 +20,7 @@ namespace netcore3_simple_game_engine
         AudioContext context = null;
         List<SoundEntry> soundEntries = new List<SoundEntry>();
 
-        public void PlaySound(string fileName)
+        public void PlaySound(string fileName, float volume, bool loop)
         {
             if (context == null)
                 context = new AudioContext();
@@ -30,6 +30,9 @@ namespace netcore3_simple_game_engine
                 Buffer = AL.GenBuffer(),
                 Source = AL.GenSource()
             };
+
+            AL.Source(entry.Source, ALSourcef.Gain, volume);
+            AL.Source(entry.Source, ALSourceb.Looping, loop);
 
             int channels, bits_per_sample, sample_rate;
             byte[] sound_data = LoadWave(File.Open(fileName, FileMode.Open), out channels, out bits_per_sample, out sample_rate);
@@ -98,7 +101,7 @@ namespace netcore3_simple_game_engine
                 bits = bits_per_sample;
                 rate = sample_rate;
 
-                return reader.ReadBytes((int)reader.BaseStream.Length);
+                return reader.ReadBytes((int)data_chunk_size);
             }
         }
 
