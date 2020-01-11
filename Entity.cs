@@ -1,5 +1,4 @@
 using OpenTK;
-using OpenTK.Graphics.OpenGL4;
 
 using netcore3_simple_game_engine;
 
@@ -11,7 +10,7 @@ namespace netcore3_simple_game_engine
         public Matrix4 ModelMatrix;
         public IRenderData RenderData;
         
-        public Entity(string name, IRenderData renderData, Matrix4 modelMatrix)
+        public Entity(string name, Matrix4 modelMatrix, IRenderData renderData, string texture)
         {
             Name = name;
             ModelMatrix = modelMatrix;

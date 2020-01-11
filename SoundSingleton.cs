@@ -16,12 +16,12 @@ namespace netcore3_simple_game_engine
     }
 
     // TODO: Pre-load all sound effects
-    public class Sound
+    public static class SoundSingleton
     {
-        AudioContext context = null;
-        List<SoundEntry> soundEntries = new List<SoundEntry>();
+        static AudioContext context = null;
+        static List<SoundEntry> soundEntries = new List<SoundEntry>();
 
-        public void PlaySound(string fileName, float volume, bool loop)
+        public static void PlaySound(string fileName, float volume, bool loop)
         {
             if (context == null)
                 context = new AudioContext();
@@ -45,7 +45,7 @@ namespace netcore3_simple_game_engine
             soundEntries.Add(entry);
         }
 
-        public void Cleanup()
+        public static void Cleanup()
         {
             foreach (SoundEntry entry in soundEntries)
             {
@@ -61,7 +61,7 @@ namespace netcore3_simple_game_engine
         }
 
         // Loads a wave/riff audio file.
-        public static byte[] LoadWave(Stream stream, out int channels, out int bits, out int rate)
+        private static byte[] LoadWave(Stream stream, out int channels, out int bits, out int rate)
         {
             if (stream == null)
                 throw new ArgumentNullException("stream");
@@ -106,7 +106,7 @@ namespace netcore3_simple_game_engine
             }
         }
 
-        public static ALFormat GetSoundFormat(int channels, int bits)
+        private static ALFormat GetSoundFormat(int channels, int bits)
         {
             switch (channels)
             {
