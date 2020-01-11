@@ -60,6 +60,18 @@ namespace netcore3_simple_game_engine
             }
         }
 
+        public static void Close()
+        {
+            foreach (SoundEntry entry in soundEntries)
+            {
+                AL.SourceStop(entry.Source);
+                AL.DeleteSource(entry.Source);
+                AL.DeleteBuffer(entry.Buffer);
+            }
+
+            context.Dispose();
+        }
+
         // Loads a wave/riff audio file.
         private static byte[] LoadWave(Stream stream, out int channels, out int bits, out int rate)
         {

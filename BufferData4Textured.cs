@@ -75,12 +75,12 @@ namespace netcore3_simple_game_engine
                     }
                 )
                 .ToArray(),
-                Indices = Enumerable.Range(1, vertices)
+                Indices = Enumerable.Range(0, vertices)
                 .SelectMany(x => new uint[]
                     {
                         0,
-                        (uint)(x <= vertices ? x : (x - vertices)),
-                        (uint)((x + 1) <= vertices ? (x + 1) : ((x + 1) - vertices))
+                        (uint)((x + 1) <= vertices ? (x + 1) : ((x + 1) - vertices)),
+                        (uint)((x + 2) <= vertices ? (x + 2) : ((x + 2) - vertices))
                     }
                 )
                 .ToArray()
