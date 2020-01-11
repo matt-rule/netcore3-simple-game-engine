@@ -8,7 +8,7 @@ namespace netcore3_simple_game_engine
 {
     public class RenderDataTextured: IRenderData
     {
-        public Vertex2dTextured[] Vertices;
+        public Vertex2Textured[] Vertices;
         public uint[] Indices;
         // Identifies a texture object by name, distinct from filename.
         public string textureName;

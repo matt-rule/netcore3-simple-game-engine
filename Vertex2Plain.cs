@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 namespace netcore3_simple_game_engine
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vertex2dPlain
+    public struct Vertex2Plain
     {
-        public Vector2d Position;
+        public Vector2 Position;
         public Color4 Colour;
     }
 }
