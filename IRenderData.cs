@@ -15,7 +15,7 @@ namespace netcore3_simple_game_engine
     /// TODO: Consider replacing the use of interfaces using the
     /// OneOf library which supports sum types in dotnet core.
     /// </summary>
-    public interface IRenderData
+    public interface IRenderData: IDisposable
     {
         void Render();
     }

@@ -23,5 +23,10 @@ namespace netcore3_simple_game_engine
 
             GL.BindTexture(TextureTarget.Texture2D, -1);
         }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
