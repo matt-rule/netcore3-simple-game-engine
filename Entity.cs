@@ -10,7 +10,7 @@ namespace netcore3_simple_game_engine
         public Matrix4 ModelMatrix;
         public IRenderData RenderData;
         
-        public Entity(string name, Matrix4 modelMatrix, IRenderData renderData, string texture)
+        public Entity(string name, Matrix4 modelMatrix, IRenderData renderData)
         {
             Name = name;
             ModelMatrix = modelMatrix;

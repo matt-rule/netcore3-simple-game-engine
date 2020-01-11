@@ -5,14 +5,14 @@ using OpenTK.Graphics;
 
 namespace netcore3_simple_game_engine
 {
-    public class BufferData2Textured
+    public class BufferData4Textured
     {
         public Vertex4Textured[] Vertices;
         public uint[] Indices;
 
-        public static BufferData2Textured Rectangle(Color4 col, float width = 1, float height = 1)
+        public static BufferData4Textured Rectangle(Color4 col, float width = 1, float height = 1)
         {
-            return new BufferData2Textured {
+            return new BufferData4Textured {
                 Vertices = new Vector2[] {
                     new Vector2(0, 0),
                     new Vector2(1, 0),
@@ -30,9 +30,9 @@ namespace netcore3_simple_game_engine
             };
         }
 
-        public static BufferData2Textured CentredRectangle(Color4 col, float width, float height)
+        public static BufferData4Textured CentredRectangle(Color4 col, float width, float height)
         {
-            return new BufferData2Textured {
+            return new BufferData4Textured {
                 Vertices = new Vector2[] {
                     new Vector2(0, 0),
                     new Vector2(1, 0),
@@ -50,7 +50,7 @@ namespace netcore3_simple_game_engine
             };
         }
 
-        public static BufferData2Textured UnitCircle(Color4 col, int vertices, float radius)
+        public static BufferData4Textured UnitCircle(Color4 col, int vertices, float radius)
         {
             var UnitCircleVertices =
                 new Vector2[]{
@@ -67,7 +67,7 @@ namespace netcore3_simple_game_engine
                 )
                 .ToArray();
 
-            return new BufferData2Textured {
+            return new BufferData4Textured {
                 Vertices = UnitCircleVertices.Select(
                     v => new Vertex4Textured {
                         Position = new Vector4(v.X, v.Y, 0.0f, 1.0f),

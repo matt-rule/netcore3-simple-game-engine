@@ -18,8 +18,11 @@ namespace netcore3_simple_game_engine
         // Name used to identify this texture (not a filename).
         public string Name;
 
-        public TextureObject(string filename)
+        public TextureObject(string name, string filename)
         {
+            Name = name;
+            Bitmap = new Bitmap(filename);
+
             GL.GenTextures(1, out TextureId);
             GL.BindTexture(TextureTarget.Texture2D, TextureId);
 
