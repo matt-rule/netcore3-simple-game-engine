@@ -7,7 +7,7 @@ namespace netcore3_simple_game_engine
     [StructLayout(LayoutKind.Sequential)]
     public struct Vertex2dPlain
     {
-        public Vector2 Position;
+        public Vector2d Position;
         public Color4 Colour;
     }
 }
