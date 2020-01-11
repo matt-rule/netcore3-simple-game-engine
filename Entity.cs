@@ -9,17 +9,17 @@ namespace netcore3_simple_game_engine
     {
         public string Name;
         public Matrix4 ModelMatrix;
-        public Vertex3d[] Vertices;
+        public IVertexData VertexData;
         public uint[] Indices;
         public int VertexArrayObjectId;
         public int VertexBufferObjectId;
         public int IndexBufferObjectId;
         
-        public Entity(string name, Matrix4 modelMatrix, BufferData bufferData)
+        public Entity(string name, Matrix4 modelMatrix, BufferData bufferData, string texture)
         {
             Name = name;
             ModelMatrix = modelMatrix;
-            Vertices = bufferData.Vertices;
+            VertexData = new TexVertexData(bufferData.Vertices, texture);
             Indices = bufferData.Indices;
             VertexArrayObjectId = GL.GenVertexArray();
             VertexBufferObjectId = GL.GenBuffer();
