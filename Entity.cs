@@ -9,7 +9,7 @@ namespace netcore3_simple_game_engine
     {
         public string Name;
         public Matrix4 ModelMatrix;
-        public Vertex3d[] Vertices;
+        public Vertex4Plain[] Vertices;
         public uint[] Indices;
         public int VertexArrayObjectId;
         public int VertexBufferObjectId;
