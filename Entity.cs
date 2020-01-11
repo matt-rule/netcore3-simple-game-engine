@@ -15,12 +15,12 @@ namespace netcore3_simple_game_engine
         public int VertexBufferObjectId;
         public int IndexBufferObjectId;
         
-        public Entity(string name, Matrix4 modelMatrix, BufferData bufferData)
+        public Entity(string name, Matrix4 modelMatrix, BufferData4Plain BufferData4Plain)
         {
             Name = name;
             ModelMatrix = modelMatrix;
-            Vertices = bufferData.Vertices;
-            Indices = bufferData.Indices;
+            Vertices = BufferData4Plain.Vertices;
+            Indices = BufferData4Plain.Indices;
             VertexArrayObjectId = GL.GenVertexArray();
             VertexBufferObjectId = GL.GenBuffer();
             IndexBufferObjectId = GL.GenBuffer();
