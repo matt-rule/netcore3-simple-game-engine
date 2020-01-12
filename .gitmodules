@@ -1,0 +1,3 @@
+[submodule "BulletSharpPInvoke"]
+	path = BulletSharpPInvoke
+	url = https://github.com/AndresTraks/BulletSharpPInvoke.git
