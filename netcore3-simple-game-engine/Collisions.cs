@@ -15,6 +15,15 @@ namespace netcore3_simple_game_engine
         public string Name;
     }
 
+    public class BoxInfo
+    {
+        public Box2DShape BoxShape;
+        public RigidBodyConstructionInfo BoxConstructionInfo;
+        public RigidBody Box;
+        public OpenTK.Vector3 DefaultPosition;
+        public string Name;
+    }
+
     public struct CollisionResult
     {
         public bool DidCollide;
@@ -31,6 +40,7 @@ namespace netcore3_simple_game_engine
 
         // Stores a name for each ball to identify them.
         public static List<BallInfo> balls;
+        public static List<BoxInfo> boxes;
 
         static Collisions()
         {
@@ -51,17 +61,67 @@ namespace netcore3_simple_game_engine
             // }
 
             balls = new List<BallInfo>();
+            boxes = new List<BoxInfo>();
         }
 
-        public static void AddBall(string name, OpenTK.Vector3 position)
+        public static void AddPaddle(string name, OpenTK.Vector3 position, double width, double height, double paddleAngle)
         {
-            SphereShape ballShape = new SphereShape(2f);
+            Box2DShape boxShape = new Box2DShape((float)(width / 2), (float)(height / 2), (0.0f));
+            RigidBodyConstructionInfo boxConstructionInfo = new RigidBodyConstructionInfo(0f, new DefaultMotionState(
+                Matrix.Translation(position.X, position.Y, 0) * Matrix.RotationZ((float)paddleAngle)
+            ), boxShape);
+            RigidBody box = new RigidBody(boxConstructionInfo);
+            box.LinearFactor = new BulletSharp.Math.Vector3(1, 1, 0);
+            box.AngularFactor = new BulletSharp.Math.Vector3(0, 0, 1);
+            box.Restitution = 1.0f;
+
+            boxes.Add(new BoxInfo{
+                BoxShape = boxShape,
+                BoxConstructionInfo = boxConstructionInfo,
+                Box = box,
+                Name = name,
+                DefaultPosition = position
+            });
+
+            //Add box to the world
+            colWorld.AddCollisionObject(box);
+        }
+
+        public static void SetPaddleRotation(string name, double paddleAngle)
+        {
+            var paddle = boxes.First(x => x.Name == name);
+            paddle.Box.MotionState = new DefaultMotionState(
+                Matrix.Translation(
+                    paddle.DefaultPosition.X,
+                    paddle.DefaultPosition.Y,
+                    0) * Matrix.RotationZ((float)paddleAngle)
+            );
+        }
+
+        public static OpenTK.Matrix4 GetPaddleRotation(string name)
+        {
+            var paddle = boxes.First(x => x.Name == name);
+            var mat = paddle.Box.MotionState.WorldTransform;
+
+            return new OpenTK.Matrix4(
+                mat.M11, mat.M12, mat.M13, mat.M14,
+                mat.M21, mat.M22, mat.M23, mat.M24,
+                mat.M31, mat.M32, mat.M33, mat.M34,
+                mat.M41, mat.M42, mat.M43, mat.M44
+            );
+        }
+
+        public static void AddBall(string name, OpenTK.Vector3 position, OpenTK.Vector3 velocity, double radius)
+        {
+            SphereShape ballShape = new SphereShape((float)radius);
             RigidBodyConstructionInfo ballConstructionInfo = new RigidBodyConstructionInfo(5f, new DefaultMotionState(
-                Matrix.Translation(position.X, position.Y, position.Z)
+                Matrix.Translation(position.X, position.Y, 0)
             ), ballShape);
             RigidBody ball = new RigidBody(ballConstructionInfo);
             ball.LinearFactor = new BulletSharp.Math.Vector3(1, 1, 0);
             ball.AngularFactor = new BulletSharp.Math.Vector3(0, 0, 1);
+            ball.LinearVelocity = new BulletSharp.Math.Vector3(velocity.X, velocity.Y, 0);
+            ball.Restitution = 1.0f;
 
             balls.Add(new BallInfo{
                 BallShape = ballShape,
@@ -87,6 +147,18 @@ namespace netcore3_simple_game_engine
             return new OpenTK.Vector3(
                 ball.MotionState.WorldTransform.Origin.X,
                 ball.MotionState.WorldTransform.Origin.Y,
+                0.0f
+            );
+        }
+
+        public static OpenTK.Vector3? GetBox(string name)
+        {
+            RigidBody box = boxes?.FirstOrDefault(x => x.Name == name)?.Box;
+            if (box == null)
+                return null;
+            return new OpenTK.Vector3(
+                box.MotionState.WorldTransform.Origin.X,
+                box.MotionState.WorldTransform.Origin.Y,
                 0.0f
             );
         }
