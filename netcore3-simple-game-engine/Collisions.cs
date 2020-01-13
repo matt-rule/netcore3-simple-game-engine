@@ -1,10 +1,20 @@
-
+using BulletSharp;
+using BulletSharp.Math;
 using OpenTK;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace netcore3_simple_game_engine
 {
+    public class BallInfo
+    {
+        public SphereShape BallShape;
+        public RigidBodyConstructionInfo BallConstructionInfo;
+        public RigidBody Ball;
+        public string Name;
+    }
+
     public struct CollisionResult
     {
         public bool DidCollide;
@@ -14,6 +24,73 @@ namespace netcore3_simple_game_engine
 
     public static class Collisions
     {
+        public static DefaultCollisionConfiguration collisionConfig;
+        public static CollisionDispatcher collisionDispatcher;
+        public static DbvtBroadphase broadphase;
+        public static DiscreteDynamicsWorld colWorld;
+
+        // Stores a name for each ball to identify them.
+        public static List<BallInfo> balls;
+
+        static Collisions()
+        {
+            collisionConfig = new DefaultCollisionConfiguration();
+            collisionDispatcher = new CollisionDispatcher(collisionConfig);
+            broadphase = new DbvtBroadphase();
+            colWorld = new DiscreteDynamicsWorld(collisionDispatcher, broadphase, null, collisionConfig);
+            colWorld.Gravity = new BulletSharp.Math.Vector3(0, 0, 0);
+
+            //Prepare simulation parameters, try 25 steps to see the ball mid air
+            // var simulationIterations = 125;
+            // var simulationTimestep = 1f / 60f;
+
+            // //Step through the desired amount of simulation ticks
+            // for (var i = 0; i < simulationIterations; i++)
+            // {
+            //     Update(simulationTimestep);
+            // }
+
+            balls = new List<BallInfo>();
+        }
+
+        public static void AddBall(string name, OpenTK.Vector3 position)
+        {
+            SphereShape ballShape = new SphereShape(2f);
+            RigidBodyConstructionInfo ballConstructionInfo = new RigidBodyConstructionInfo(5f, new DefaultMotionState(
+                Matrix.Translation(position.X, position.Y, position.Z)
+            ), ballShape);
+            RigidBody ball = new RigidBody(ballConstructionInfo);
+            ball.LinearFactor = new BulletSharp.Math.Vector3(1, 1, 0);
+            ball.AngularFactor = new BulletSharp.Math.Vector3(0, 0, 1);
+
+            balls.Add(new BallInfo{
+                BallShape = ballShape,
+                BallConstructionInfo = ballConstructionInfo,
+                Ball = ball,
+                Name = name
+            });
+
+            //Add ball to the world
+            colWorld.AddCollisionObject(ball);
+        }
+
+        public static void Update(float timeElapsed)
+        {
+            colWorld.StepSimulation(timeElapsed);
+        }
+
+        public static OpenTK.Vector3? GetBall(string name)
+        {
+            RigidBody ball = balls?.FirstOrDefault(x => x.Name == name)?.Ball;
+            if (ball == null)
+                return null;
+            return new OpenTK.Vector3(
+                ball.MotionState.WorldTransform.Origin.X,
+                ball.MotionState.WorldTransform.Origin.Y,
+                0.0f
+            );
+        }
+        
         public static CollisionResult CircleVsUnmovablePoint(
             double circleRadius,
             // Point position in game coords.
@@ -147,7 +224,7 @@ namespace netcore3_simple_game_engine
                 new Vector2d(+rectangleWidth / 2, -rectangleHeight / 2),
                 new Vector2d(+rectangleWidth / 2, +rectangleHeight / 2)
             }
-            .Select(x => (Vector2d)(new Vector4((float)x.X, (float)x.Y, (float)0.0, (float)1.0) * rectangleTransform).Xy)
+            .Select(x => (Vector2d)(new OpenTK.Vector4((float)x.X, (float)x.Y, (float)0.0, (float)1.0) * rectangleTransform).Xy)
             .ToArray();
 
             var pointCollisionResults = rectangleCorners.Select(x => CircleVsUnmovablePoint(
@@ -168,8 +245,8 @@ namespace netcore3_simple_game_engine
                 (new Vector2d(+rectangleWidth / 2, -rectangleHeight / 2), new Vector2d(-rectangleWidth / 2, -rectangleHeight / 2))
             }
             .Select(x => (
-                (Vector2d)(new Vector4((float)x.Item1.X, (float)x.Item1.Y, (float)0.0, (float)1.0) * rectangleTransform).Xy,
-                (Vector2d)(new Vector4((float)x.Item2.X, (float)x.Item2.Y, (float)0.0, (float)1.0) * rectangleTransform).Xy
+                (Vector2d)(new OpenTK.Vector4((float)x.Item1.X, (float)x.Item1.Y, (float)0.0, (float)1.0) * rectangleTransform).Xy,
+                (Vector2d)(new OpenTK.Vector4((float)x.Item2.X, (float)x.Item2.Y, (float)0.0, (float)1.0) * rectangleTransform).Xy
             ))
             .ToArray();
 
