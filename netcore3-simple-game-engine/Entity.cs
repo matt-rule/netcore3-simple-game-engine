@@ -9,12 +9,14 @@ namespace netcore3_simple_game_engine
         public string Name;
         public IRenderData RenderData;
         public double RotationAngle;
+        public double PaddleInitialY;
         
-        public Entity(string name, IRenderData renderData, double rotationAngle)
+        public Entity(string name, IRenderData renderData, double rotationAngle, double paddleInitialY)
         {
             Name = name;
             RenderData = renderData;
             RotationAngle = rotationAngle;
+            PaddleInitialY = paddleInitialY;
         }
     }
 }
