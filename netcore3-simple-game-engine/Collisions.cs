@@ -222,6 +222,18 @@ namespace netcore3_simple_game_engine
             );
         }
 
+        public static void SetBallPosition(string name, OpenTK.Vector3 position)
+        {
+            RigidBody ball = balls?.FirstOrDefault(x => (x.BallObject as Entity).Name == name)?.Ball;
+            if (ball == null)
+                return;
+            ball.MotionState = new DefaultMotionState(
+                Matrix.Translation(
+                    new BulletSharp.Math.Vector3(position.X, position.Y, 0)
+                )
+            );
+        }
+
         public static OpenTK.Vector3? GetBox(string name)
         {
             RigidBody box = boxes?.FirstOrDefault(x => (x.BoxObject as Entity).Name == name)?.Box;

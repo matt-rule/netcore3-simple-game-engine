@@ -7,14 +7,14 @@ namespace netcore3_simple_game_engine
     public class Entity
     {
         public string Name;
-        public Matrix4 ModelMatrix;
         public IRenderData RenderData;
+        public double RotationAngle;
         
-        public Entity(string name, Matrix4 modelMatrix, IRenderData renderData)
+        public Entity(string name, IRenderData renderData, double rotationAngle)
         {
             Name = name;
-            ModelMatrix = modelMatrix;
             RenderData = renderData;
+            RotationAngle = rotationAngle;
         }
     }
 }
