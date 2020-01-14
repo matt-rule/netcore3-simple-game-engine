@@ -9,19 +9,19 @@ namespace netcore3_simple_game_engine
 {
     public class BallInfo
     {
+        public Entity BallObject;
         public SphereShape BallShape;
         public RigidBodyConstructionInfo BallConstructionInfo;
         public RigidBody Ball;
-        public string Name;
     }
 
     public class BoxInfo
     {
+        public Entity BoxObject;
         public Box2DShape BoxShape;
         public RigidBodyConstructionInfo BoxConstructionInfo;
         public RigidBody Box;
         public OpenTK.Vector3 DefaultPosition;
-        public string Name;
     }
 
     public struct CollisionResult
@@ -30,6 +30,18 @@ namespace netcore3_simple_game_engine
         public Vector2d NewCirclePosition;
         public Vector2d NewCircleVelocity;
     }
+
+    // public class Test : ContactResultCallback
+    // {
+    //     // public override float AddSingleResult(ManifoldPoint cp, CollisionObjectWrapper colObj0Wrap, int partId0, int index0, CollisionObjectWrapper colObj1Wrap, int partId1, int index1)
+    //     // {
+    //     //     if ((colObj0Wrap.CollisionObject.UserObject as Entity).Name.StartsWith("ball")
+    //     //     && (colObj1Wrap.CollisionObject.UserObject as Entity).Name.StartsWith("bat"))
+    //     //         SoundSingleton.PlaySound("assets/193831__ligidium__door-knock-15.wav", 1.0f, false);
+
+    //     //     return 0; // not actually sure if return value is used for anything...?
+    //     // }
+    // }
 
     public static class Collisions
     {
@@ -41,6 +53,7 @@ namespace netcore3_simple_game_engine
         // Stores a name for each ball to identify them.
         public static List<BallInfo> balls;
         public static List<BoxInfo> boxes;
+        public static Action CollisionAction;
 
         static Collisions()
         {
@@ -49,6 +62,9 @@ namespace netcore3_simple_game_engine
             broadphase = new DbvtBroadphase();
             colWorld = new DiscreteDynamicsWorld(collisionDispatcher, broadphase, null, collisionConfig);
             colWorld.Gravity = new BulletSharp.Math.Vector3(0, 0, 0);
+            CollisionAction = null;
+
+            
 
             //Prepare simulation parameters, try 25 steps to see the ball mid air
             // var simulationIterations = 125;
@@ -64,22 +80,35 @@ namespace netcore3_simple_game_engine
             boxes = new List<BoxInfo>();
         }
 
-        public static void AddPaddle(string name, OpenTK.Vector3 position, double width, double height, double paddleAngle)
+        public static void SetCollisionAction(Action collisionAction)
+        {
+            CollisionAction = collisionAction;
+        }
+
+        public static void AddPaddle(Entity boxObject, OpenTK.Vector3 position, double width, double height, double paddleAngle)
         {
             Box2DShape boxShape = new Box2DShape((float)(width / 2), (float)(height / 2), (0.0f));
-            RigidBodyConstructionInfo boxConstructionInfo = new RigidBodyConstructionInfo(0f, new DefaultMotionState(
+            RigidBodyConstructionInfo boxConstructionInfo = new RigidBodyConstructionInfo(10000f, new DefaultMotionState(
                 Matrix.Translation(position.X, position.Y, 0) * Matrix.RotationZ((float)paddleAngle)
             ), boxShape);
             RigidBody box = new RigidBody(boxConstructionInfo);
             box.LinearFactor = new BulletSharp.Math.Vector3(1, 1, 0);
             box.AngularFactor = new BulletSharp.Math.Vector3(0, 0, 1);
-            box.Restitution = 1.0f;
+            box.SetDamping(0,0);
+            box.Restitution = 1f;
+            box.Friction = 0.0f;
+            box.UserObject = boxObject;
+
+            foreach (var box2 in boxes)
+            {
+                box.SetIgnoreCollisionCheck(box2.Box, true);
+            }
 
             boxes.Add(new BoxInfo{
+                BoxObject = boxObject,
                 BoxShape = boxShape,
                 BoxConstructionInfo = boxConstructionInfo,
                 Box = box,
-                Name = name,
                 DefaultPosition = position
             });
 
@@ -89,7 +118,7 @@ namespace netcore3_simple_game_engine
 
         public static void SetPaddleRotation(string name, double paddleAngle)
         {
-            var paddle = boxes.First(x => x.Name == name);
+            var paddle = boxes.First(x => (x.BoxObject as Entity).Name == name);
             paddle.Box.MotionState = new DefaultMotionState(
                 Matrix.Translation(
                     paddle.DefaultPosition.X,
@@ -100,7 +129,7 @@ namespace netcore3_simple_game_engine
 
         public static OpenTK.Matrix4 GetPaddleRotation(string name)
         {
-            var paddle = boxes.First(x => x.Name == name);
+            var paddle = boxes.First(x => (x.BoxObject as Entity).Name == name);
             var mat = paddle.Box.MotionState.WorldTransform;
 
             return new OpenTK.Matrix4(
@@ -110,8 +139,39 @@ namespace netcore3_simple_game_engine
                 mat.M41, mat.M42, mat.M43, mat.M44
             );
         }
+        public static void NearCallback(BroadphasePair collisionPair, CollisionDispatcher dispatcher, DispatcherInfo dispatcherInfo)
+        {
+            if (CollisionAction != null)
+                CollisionAction();
+                
+            CollisionDispatcher.DefaultNearCallback(collisionPair, dispatcher, dispatcherInfo);
+        }
 
-        public static void AddBall(string name, OpenTK.Vector3 position, OpenTK.Vector3 velocity, double radius)
+        public static void TickCallback(DynamicsWorld world, float timeStep)
+        {
+
+            int numManifolds = colWorld.Dispatcher.NumManifolds;
+            for (int i = 0; i < numManifolds; i++)
+            {
+                PersistentManifold contactManifold = colWorld.Dispatcher.GetManifoldByIndexInternal(i);
+                CollisionObject obA = contactManifold.Body0 as CollisionObject;
+                CollisionObject obB = contactManifold.Body1 as CollisionObject;
+
+                int numContacts = contactManifold.NumContacts;
+                for (int j = 0; j < numContacts; j++)
+                {
+                    ManifoldPoint pt = contactManifold.GetContactPoint(j);
+                    if (pt.Distance < 1.0f)
+                    {
+                        if (CollisionAction != null)
+                            CollisionAction();
+                        return;
+                    }
+                }
+            }
+        }
+
+        public static void AddBall(Entity ballObject, OpenTK.Vector3 position, OpenTK.Vector3 velocity, double radius)
         {
             SphereShape ballShape = new SphereShape((float)radius);
             RigidBodyConstructionInfo ballConstructionInfo = new RigidBodyConstructionInfo(5f, new DefaultMotionState(
@@ -121,27 +181,38 @@ namespace netcore3_simple_game_engine
             ball.LinearFactor = new BulletSharp.Math.Vector3(1, 1, 0);
             ball.AngularFactor = new BulletSharp.Math.Vector3(0, 0, 1);
             ball.LinearVelocity = new BulletSharp.Math.Vector3(velocity.X, velocity.Y, 0);
+            ball.SetDamping(0,0);
             ball.Restitution = 1.0f;
+            ball.Friction = 0.0f;
+            ball.UserObject = ballObject;
 
             balls.Add(new BallInfo{
+                BallObject = ballObject,
                 BallShape = ballShape,
                 BallConstructionInfo = ballConstructionInfo,
-                Ball = ball,
-                Name = name
+                Ball = ball
             });
 
             //Add ball to the world
             colWorld.AddCollisionObject(ball);
+            colWorld.SetInternalTickCallback(TickCallback);
+            //collisionDispatcher.NearCallback += NearCallback;
         }
 
-        public static void Update(float timeElapsed)
+        public static void Update(float timeElapsed, Action collisionAction)
         {
             colWorld.StepSimulation(timeElapsed);
+            foreach (var ball in balls)
+            {
+                BulletSharp.Math.Vector3 linearVelocity = ball.Ball.LinearVelocity;
+                linearVelocity.Normalize();
+                ball.Ball.LinearVelocity = linearVelocity * 180;
+            }
         }
 
         public static OpenTK.Vector3? GetBall(string name)
         {
-            RigidBody ball = balls?.FirstOrDefault(x => x.Name == name)?.Ball;
+            RigidBody ball = balls?.FirstOrDefault(x => (x.BallObject as Entity).Name == name)?.Ball;
             if (ball == null)
                 return null;
             return new OpenTK.Vector3(
@@ -153,7 +224,7 @@ namespace netcore3_simple_game_engine
 
         public static OpenTK.Vector3? GetBox(string name)
         {
-            RigidBody box = boxes?.FirstOrDefault(x => x.Name == name)?.Box;
+            RigidBody box = boxes?.FirstOrDefault(x => (x.BoxObject as Entity).Name == name)?.Box;
             if (box == null)
                 return null;
             return new OpenTK.Vector3(
