@@ -71,7 +71,7 @@ namespace netcore3_simple_game_engine
 
         public void Render(Matrix4 Mvp)
         {
-            var textureObject = TextureObjectSingleton.GetByName(TextureName);
+            var textureObject = TextureObjectSingleton.GetSingleTextureByName(TextureName);
             
             var shaderObj = ShaderObjectSingleton.GetByName(ShaderName);                
             GL.UseProgram(shaderObj.ProgramId);
