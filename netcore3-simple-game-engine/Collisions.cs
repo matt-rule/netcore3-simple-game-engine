@@ -53,7 +53,8 @@ namespace netcore3_simple_game_engine
         // Stores a name for each ball to identify them.
         public static List<BallInfo> balls;
         public static List<BoxInfo> boxes;
-        public static Action CollisionAction;
+        public static Action HardCollisionAction;
+        public static Action SoftCollisionAction;
 
         static Collisions()
         {
@@ -62,7 +63,8 @@ namespace netcore3_simple_game_engine
             broadphase = new DbvtBroadphase();
             colWorld = new DiscreteDynamicsWorld(collisionDispatcher, broadphase, null, collisionConfig);
             colWorld.Gravity = new BulletSharp.Math.Vector3(0, 0, 0);
-            CollisionAction = null;
+            HardCollisionAction = null;
+            SoftCollisionAction = null;
 
             
 
@@ -80,9 +82,10 @@ namespace netcore3_simple_game_engine
             boxes = new List<BoxInfo>();
         }
 
-        public static void SetCollisionAction(Action collisionAction)
+        public static void SetCollisionActions(Action hardCollisionAction, Action softCollisionAction)
         {
-            CollisionAction = collisionAction;
+            HardCollisionAction = hardCollisionAction;
+            SoftCollisionAction = softCollisionAction;
         }
 
         public static void AddPaddle(Entity boxObject, OpenTK.Vector3 position, double width, double height, double paddleAngle)
@@ -141,8 +144,12 @@ namespace netcore3_simple_game_engine
         }
         public static void NearCallback(BroadphasePair collisionPair, CollisionDispatcher dispatcher, DispatcherInfo dispatcherInfo)
         {
-            if (CollisionAction != null)
-                CollisionAction();
+            var entity1 = (collisionPair.Proxy0.ClientObject as RigidBody).UserObject as Entity;
+            var entity2 = (collisionPair.Proxy1.ClientObject as RigidBody).UserObject as Entity;
+
+            if (HardCollisionAction != null)
+                if (entity1.CollisionType == CollisionTypeEnum.Hard)
+                    HardCollisionAction();
                 
             CollisionDispatcher.DefaultNearCallback(collisionPair, dispatcher, dispatcherInfo);
         }
@@ -154,8 +161,10 @@ namespace netcore3_simple_game_engine
             for (int i = 0; i < numManifolds; i++)
             {
                 PersistentManifold contactManifold = colWorld.Dispatcher.GetManifoldByIndexInternal(i);
-                CollisionObject obA = contactManifold.Body0 as CollisionObject;
-                CollisionObject obB = contactManifold.Body1 as CollisionObject;
+                // CollisionObject obA = contactManifold.Body0 as CollisionObject;
+                // CollisionObject obB = contactManifold.Body1 as CollisionObject;
+                var entity1 = (contactManifold.Body0 as RigidBody).UserObject as Entity;
+                var entity2 = (contactManifold.Body1 as RigidBody).UserObject as Entity;
 
                 int numContacts = contactManifold.NumContacts;
                 for (int j = 0; j < numContacts; j++)
@@ -163,8 +172,14 @@ namespace netcore3_simple_game_engine
                     ManifoldPoint pt = contactManifold.GetContactPoint(j);
                     if (pt.Distance < 1.0f)
                     {
-                        if (CollisionAction != null)
-                            CollisionAction();
+                        if (HardCollisionAction != null)
+                        {
+                            if (entity1.CollisionType == CollisionTypeEnum.Soft
+                            && entity2.CollisionType == CollisionTypeEnum.Soft)
+                                SoftCollisionAction();
+                            else
+                                HardCollisionAction();
+                        }
                         return;
                     }
                 }
@@ -199,7 +214,7 @@ namespace netcore3_simple_game_engine
             //collisionDispatcher.NearCallback += NearCallback;
         }
 
-        public static void Update(float timeElapsed, Action collisionAction)
+        public static void Update(float timeElapsed)
         {
             colWorld.StepSimulation(timeElapsed);
             foreach (var ball in balls)
