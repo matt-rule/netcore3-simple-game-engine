@@ -10,7 +10,7 @@ namespace netcore3_simple_game_engine
         public Vertex4Textured[] Vertices;
         public uint[] Indices;
 
-        public static BufferData4Textured Rectangle(Color4 col, float width = 1, float height = 1)
+        public static BufferData4Textured Rectangle(float width = 1, float height = 1)
         {
             return new BufferData4Textured {
                 Vertices = new Vector2[] {

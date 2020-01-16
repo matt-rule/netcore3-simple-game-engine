@@ -8,6 +8,7 @@ namespace netcore3_simple_game_engine
 {
     /// <summary>
     /// Instances of this class should only be created after OpenGL initialisation.
+    /// This class knows about textures, not geometry.
     /// </summary>
     public class SpriteTextureObject: IDisposable
     {
