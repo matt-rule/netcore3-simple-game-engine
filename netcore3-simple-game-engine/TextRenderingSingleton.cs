@@ -74,20 +74,12 @@ namespace netcore3_simple_game_engine
         /// <param name="scale"></param>
         /// <param name="frame">Must be >= 0 and < TexCount.</param>
         /// <param name="flip">Flips horizontally.</param>
-        public static void RenderFromCorner(SpriteTextureObject spriteTexture, Matrix4 baseMvp, string shaderName, double scale, int frame, bool flip = false)
+        public static void RenderFromCorner(SpriteTextureObject spriteTexture, Matrix4 baseMvp, string shaderName, double scale, int frame)
         {
             Matrix4 finalMatrix = baseMvp;
 
             finalMatrix = Matrix4.CreateScale((float)scale, (float)scale, 1.0f) * finalMatrix;
 
-            // if (flip)
-            // {
-            //     finalMatrix =
-            //         Matrix4.CreateTranslation(1.0f, 0.0f, 0.0f)
-            //         * Matrix4.CreateScale(-1.0f, 1.0f, 1.0f)
-            //         * finalMatrix;
-            // }
-            
             var shaderObj = ShaderObjectSingleton.GetByName(shaderName);                
             GL.UseProgram(shaderObj.ProgramId);
             Bind();

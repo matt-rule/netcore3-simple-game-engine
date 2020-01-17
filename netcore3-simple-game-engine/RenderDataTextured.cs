@@ -49,13 +49,13 @@ namespace netcore3_simple_game_engine
             // VertexArrayAttribFormat is the equivalent of glVertexAttribPointer
             GL.VertexArrayAttribFormat(VertexArrayObjectId, 0, 4, VertexAttribType.Float, false, 0);
 
-            // colour attribute
+            // texture attribute
             // position precedes this; offset by its size
             GL.VertexArrayAttribBinding(VertexArrayObjectId, 1, 0);
             GL.EnableVertexArrayAttrib(VertexArrayObjectId, 1);
             GL.VertexArrayAttribFormat(VertexArrayObjectId, 1, 2, VertexAttribType.Float, false, Marshal.SizeOf<Vector4>());
             
-            GL.VertexArrayVertexBuffer(VertexArrayObjectId, 0, VertexBufferObjectId, IntPtr.Zero, 6 * sizeof(float));
+            GL.VertexArrayVertexBuffer(VertexArrayObjectId, 0, VertexBufferObjectId, IntPtr.Zero, 8 * sizeof(float));
 
             // index buffer object
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferObjectId);
